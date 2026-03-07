@@ -74,6 +74,13 @@ const state = {
   animating:        false,
   animTime:         0,    // accumulated animation phase
   animRafId:        null,
+
+  // Zoom / pan – view-only transform, does not affect generation or export
+  zoom:  1.0,
+  panX:  0,
+  panY:  0,
+  svgW:  0,   // natural pixel width  stored in render(), used by zoom math
+  svgH:  0,   // natural pixel height
 };
 
 /**
@@ -156,20 +163,31 @@ function render(time) {
   const H = rect.height;
   if (W === 0 || H === 0) return;
 
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  // Store natural dimensions for zoom/pan math
+  state.svgW = W;
+  state.svgH = H;
+
+  // Apply zoom / pan via viewBox.
+  // Paths are always generated in the full W×H space; the viewBox
+  // determines which portion is visible on screen.
+  const viewW = W / state.zoom;
+  const viewH = H / state.zoom;
+  svg.setAttribute('viewBox', `${state.panX} ${state.panY} ${viewW} ${viewH}`);
 
   // Fast clear
   while (svg.firstChild) svg.removeChild(svg.firstChild);
 
   const NS = 'http://www.w3.org/2000/svg';
 
-  // Background: use bottom-most visible layer's colour
+  // Background: covers the current viewport (tracks pan/zoom)
   const firstVisible = state.layers.find(l => l.visible);
   const bgColor = firstVisible ? firstVisible.params.backgroundColor : '#080c14';
 
   const bg = document.createElementNS(NS, 'rect');
-  bg.setAttribute('width',  W);
-  bg.setAttribute('height', H);
+  bg.setAttribute('x',      state.panX);
+  bg.setAttribute('y',      state.panY);
+  bg.setAttribute('width',  viewW);
+  bg.setAttribute('height', viewH);
   bg.setAttribute('fill',   bgColor);
   svg.appendChild(bg);
 
@@ -366,6 +384,125 @@ function resetToDefault() {
   if (!state.animating) render();
 }
 
+/* ── Zoom / Pan ───────────────────────────────────────────── */
+
+/**
+ * Core zoom helper: adjusts zoom and pan so that the point at
+ * screen-pixel position (mx, my) inside the SVG element remains
+ * fixed after the zoom.
+ *
+ * Derivation:
+ *   svgCoord = panX + mx / zoom          (screen px → SVG user unit)
+ *   after zoom:  newPanX + mx / newZoom = svgCoord
+ *   ∴ newPanX = panX + mx × (1/zoom − 1/newZoom)
+ *
+ * For button zoom (no cursor), pass mx = svgW/2, my = svgH/2
+ * to keep the canvas centre fixed.
+ *
+ * @param {number} mx      X position in SVG element screen pixels
+ * @param {number} my      Y position in SVG element screen pixels
+ * @param {number} factor  Zoom multiplier (>1 = in, <1 = out)
+ */
+function zoomAt(mx, my, factor) {
+  const newZoom = Math.max(0.1, Math.min(10, state.zoom * factor));
+  const inv     = 1 / state.zoom - 1 / newZoom;
+  state.panX   += mx * inv;
+  state.panY   += my * inv;
+  state.zoom    = newZoom;
+  updateZoomLabel();
+  if (!state.animating) render();
+}
+
+/** Zoom in 25 %, centred on canvas centre. */
+function zoomIn()  { zoomAt(state.svgW / 2, state.svgH / 2, 1.25); }
+
+/** Zoom out 25 %, centred on canvas centre. */
+function zoomOut() { zoomAt(state.svgW / 2, state.svgH / 2, 1 / 1.25); }
+
+/** Reset zoom to 100 % and clear any pan offset. */
+function zoomReset() {
+  state.zoom = 1;
+  state.panX = 0;
+  state.panY = 0;
+  updateZoomLabel();
+  if (!state.animating) render();
+}
+
+/** Sync the zoom percentage badge in the zoom bar. */
+function updateZoomLabel() {
+  const el = document.getElementById('zoom-label');
+  if (el) el.textContent = Math.round(state.zoom * 100) + '%';
+}
+
+/**
+ * Attach all zoom / pan event listeners to the preview area.
+ * Called once from init().
+ */
+function setupZoomInteraction() {
+  const area = document.getElementById('preview-area');
+  const svg  = document.getElementById('preview-svg');
+  if (!area || !svg) return;
+
+  // ── Mouse-wheel zoom (centred on cursor) ────────────────
+  area.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    if (!state.svgW) return;
+
+    const r  = svg.getBoundingClientRect();
+    const mx = e.clientX - r.left;
+    const my = e.clientY - r.top;
+
+    // Normalize cross-browser delta
+    const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+    zoomAt(mx, my, factor);
+  }, { passive: false });
+
+  // ── Drag to pan ──────────────────────────────────────────
+  let isPanning = false;
+  let panLastX, panLastY;
+
+  svg.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    isPanning = true;
+    panLastX  = e.clientX;
+    panLastY  = e.clientY;
+    svg.classList.add('panning');
+    e.preventDefault();   // prevent text selection while dragging
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isPanning) return;
+    const dx = e.clientX - panLastX;
+    const dy = e.clientY - panLastY;
+    // Convert screen-pixel delta to SVG user-unit delta
+    state.panX -= dx / state.zoom;
+    state.panY -= dy / state.zoom;
+    panLastX = e.clientX;
+    panLastY = e.clientY;
+    if (!state.animating) render();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isPanning) {
+      isPanning = false;
+      svg.classList.remove('panning');
+    }
+  });
+
+  // ── Keyboard shortcuts ───────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if (!(e.metaKey || e.ctrlKey)) return;
+    if (e.key === '=' || e.key === '+') { e.preventDefault(); zoomIn(); }
+    if (e.key === '-')                  { e.preventDefault(); zoomOut(); }
+    if (e.key === '0')                  { e.preventDefault(); zoomReset(); }
+  });
+
+  // ── Zoom bar buttons ─────────────────────────────────────
+  document.getElementById('zoom-in')   ?.addEventListener('click', zoomIn);
+  document.getElementById('zoom-out')  ?.addEventListener('click', zoomOut);
+  document.getElementById('zoom-reset')?.addEventListener('click', zoomReset);
+}
+
 /* ── Init ─────────────────────────────────────────────────── */
 
 function init() {
@@ -408,6 +545,9 @@ function init() {
   // Re-render on resize
   const ro = new ResizeObserver(() => { if (!state.animating) render(); });
   ro.observe(document.getElementById('preview-svg'));
+
+  // Zoom / pan interaction
+  setupZoomInteraction();
 
   render();
 }

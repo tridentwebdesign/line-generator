@@ -64,11 +64,19 @@
     </aside>
 
     <!-- ── Preview ── -->
-    <main class="preview-area">
+    <main class="preview-area" id="preview-area">
       <svg id="preview-svg"
            xmlns="http://www.w3.org/2000/svg"
            preserveAspectRatio="xMidYMid meet">
       </svg>
+
+      <!-- Zoom controls (bottom-right overlay) -->
+      <div class="zoom-bar" id="zoom-bar">
+        <button class="zoom-btn" id="zoom-out" title="Zoom out  (scroll ↓ / ⌘−)">−</button>
+        <span   class="zoom-label" id="zoom-label">100%</span>
+        <button class="zoom-btn" id="zoom-in"  title="Zoom in  (scroll ↑ / ⌘+)">+</button>
+        <button class="zoom-btn zoom-reset-btn" id="zoom-reset" title="Reset zoom  (⌘0)">1:1</button>
+      </div>
     </main>
 
   </div><!-- /app -->
