@@ -375,6 +375,11 @@ input[type='color'] {
   color: var(--success);
 }
 
+.btn-export--wide {
+  flex: none;
+  width: 100%;
+}
+
 .actions-section {
   display: flex;
   flex-direction: column;

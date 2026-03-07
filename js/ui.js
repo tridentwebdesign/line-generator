@@ -396,7 +396,7 @@ function buildControlPanel() {
   }
 
   // Background colour picker (collapsible)
-  const { sec: bgSec, body: bgBody } = createCollapsibleSection('BACKGROUND');
+  const { sec: bgSec, body: bgBody } = createCollapsibleSection('背景');
 
   const row = document.createElement('div');
   row.className = 'color-row control-row';

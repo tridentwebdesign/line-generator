@@ -16,6 +16,7 @@ Illustratorの「ブレンド」に着想を得た、流線型の抽象ライン
 - **15項目のリアルタイムパラメーター** — スライダー操作で即時反映
 - **5つのプリセット** — 一発で雰囲気を切り替え
 - **SVG / PNG 書き出し** — 1920×1080px の高品質エクスポート
+- **背景ライブラリ書き出し** — 現在の設定をそのまま埋め込み可能なHTMLファイルとしてダウンロード
 - **アニメーション** — ゆっくり呼吸するような変形をON/OFF
 - **ビルド不要** — `index.html` をブラウザで開くだけで動作
 
@@ -103,6 +104,86 @@ open index.html   # macOS
 
 ---
 
+## 背景ライブラリとして使う
+
+サイドバー下部の **↓ 背景ライブラリ** ボタンを押すと、現在表示中のレイヤー設定をすべて含んだ自己完結型の `line-bg.html` がダウンロードされます。このファイルを使えば、任意のWebサイトにアニメーション付きのライン背景を埋め込めます。
+
+### 埋め込み方法
+
+#### 方法1: iframe で埋め込む
+
+ダウンロードした `line-bg.html` をサイトのルートに配置し、次のコードをHTMLに追加します。
+
+```html
+<iframe
+  src="line-bg.html"
+  style="position:fixed; inset:0; width:100%; height:100%;
+         border:none; z-index:-1; pointer-events:none">
+</iframe>
+```
+
+ページ全体の背景としてアニメーションが表示されます。`z-index` を調整すれば重なり順を変更できます。
+
+#### 方法2: コードをコピーして埋め込む
+
+`line-bg.html` を開き、`<div id="slg-bg"></div>` と `<script>...</script>` 部分を既存のHTMLにコピーします。CSSで `#slg-bg` の位置やサイズを制御できます。
+
+```html
+<!-- 背景コンテナ -->
+<div id="slg-bg" style="position:fixed; inset:0; z-index:-1;"></div>
+
+<!-- line-bg.html の <script> 内容をここにコピー -->
+<script>
+  // SLG runtime (line-bg.html からコピー)
+</script>
+
+<!-- 通常のページコンテンツ -->
+<main style="position:relative; z-index:1;">
+  <h1>サイトコンテンツ</h1>
+</main>
+```
+
+### JavaScript API
+
+エクスポートされたファイルはグローバル変数 `SLG` を公開します。
+
+```javascript
+SLG.stop();   // アニメーションを停止
+SLG.start();  // アニメーションを再開
+SLG.layers;   // レイヤー設定の配列（読み取り専用参照）
+```
+
+### パラメーターのカスタマイズ
+
+`line-bg.html` 内の `LAYERS` 変数（JSON配列）を直接編集すれば、ジェネレーターを使わなくても設定を調整できます。各レイヤーの `params` オブジェクトには上記パラメーターと同じキーが含まれています。
+
+```javascript
+var LAYERS = [
+  {
+    "params": {
+      "lineCount": 62,      // ライン数
+      "steps": 22,           // なめらかさ
+      "strokeWidth": 1.9,    // 線の太さ
+      "amplitude": 0.15,     // 振幅
+      "tension": 3.0,        // テンション
+      "spread": 0.15,        // 広がり
+      "noiseAmount": 0.024,  // ノイズ量
+      "angle": -18,          // 角度
+      "hueStart": 9,         // 色相（開始）
+      "hueEnd": 273,         // 色相（終了）
+      "saturation": 59,      // 彩度
+      "lightness": 62,       // 明度
+      "opacity": 0.68,       // 不透明度
+      "backgroundColor": "#ffffff",
+      "animationSpeed": 1.0,
+      "animationStrength": 0.40
+    }
+  }
+];
+```
+
+---
+
 ## アルゴリズム
 
 ```
@@ -128,7 +209,7 @@ line-generator/
     ├── generator.js    # コア数学・SVGパス生成（純粋関数）
     ├── app.js          # 状態管理・レンダーループ・レイヤー操作
     ├── ui.js           # コントロールパネル・プリセット・レイヤーUI
-    └── export.js       # SVG / PNG ダウンロード
+    └── export.js       # SVG / PNG / 背景ライブラリ ダウンロード
 ```
 
 ---

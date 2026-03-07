@@ -535,6 +535,9 @@ function init() {
   document.getElementById('btn-png')
     .addEventListener('click', () => downloadPNG());
 
+  document.getElementById('btn-lib')
+    .addEventListener('click', () => downloadLibrary());
+
   // Sidebar collapse
   document.getElementById('sidebar-toggle')
     .addEventListener('click', () => {
