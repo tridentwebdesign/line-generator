@@ -1,0 +1,529 @@
+/* ============================================================
+   SVG Line Generator – Design System & Layout
+   ============================================================ */
+
+:root {
+  --bg:           #0d0f14;
+  --panel-bg:     #141720;
+  --ctrl-bg:      #1c1f2d;
+  --border:       #252836;
+  --accent:       #5b6cf9;
+  --accent-h:     #7b8cfb;
+  --text:         #d4d8ec;
+  --text-dim:     #8a8fa8;
+  --text-muted:   #555a72;
+  --success:      #4ecb8f;
+  --panel-w:      272px;
+  --radius:       6px;
+  --font:         system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --transition:   0.18s ease;
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 12px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── App shell ─────────────────────────────────────────────── */
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────── */
+.sidebar {
+  width: var(--panel-w);
+  background: var(--panel-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+  transition: width var(--transition);
+  z-index: 10;
+}
+
+.sidebar.collapsed {
+  width: 44px;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  height: 48px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.app-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity var(--transition);
+}
+
+.sidebar.collapsed .app-title {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-toggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color var(--transition), background var(--transition);
+}
+
+.sidebar-toggle:hover {
+  color: var(--text);
+  background: var(--ctrl-bg);
+}
+
+.sidebar-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  padding-bottom: 16px;
+  transition: opacity var(--transition);
+}
+
+.sidebar.collapsed .sidebar-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Scrollbar */
+.sidebar-content::-webkit-scrollbar       { width: 3px; }
+.sidebar-content::-webkit-scrollbar-track { background: transparent; }
+.sidebar-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── Sections ──────────────────────────────────────────────── */
+.section {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section:last-child { border-bottom: none; }
+
+.section-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+/* ── Presets ───────────────────────────────────────────────── */
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.preset-btn {
+  background: var(--ctrl-bg);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: var(--font);
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 7px 5px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.preset-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.preset-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ── Slider controls ───────────────────────────────────────── */
+.control-group {
+  margin-bottom: 11px;
+}
+
+.control-group:last-child { margin-bottom: 0; }
+
+.control-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.control-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  user-select: none;
+}
+
+.control-value {
+  font-size: 10.5px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  min-width: 34px;
+  text-align: right;
+}
+
+/* Range slider – filled track via CSS custom property */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  background: linear-gradient(
+    to right,
+    var(--accent) 0%,
+    var(--accent) var(--fill, 50%),
+    var(--border)  var(--fill, 50%),
+    var(--border)  100%
+  );
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  transition: transform 0.1s, background 0.1s;
+  border: 2px solid var(--panel-bg);
+}
+
+input[type='range']::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  background: var(--accent-h);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--panel-bg);
+}
+
+/* ── Color picker ──────────────────────────────────────────── */
+.color-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.color-swatch {
+  width: 28px;
+  height: 22px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+input[type='color'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+}
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+  text-align: center;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover { background: var(--accent-h); border-color: var(--accent-h); }
+
+.btn-primary.active {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.btn-secondary {
+  background: var(--ctrl-bg);
+  color: var(--text-dim);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.btn-export {
+  background: var(--ctrl-bg);
+  color: var(--text-dim);
+  flex: 1;
+}
+
+.btn-export:hover {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.actions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-row .btn { flex: 1; }
+
+/* ── Preview area ──────────────────────────────────────────── */
+.preview-area {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background: #07090e;
+}
+
+#preview-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── Responsive (narrow screens) ──────────────────────────── */
+/* ── Layer panel ───────────────────────────────────────────── */
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Small ＋ button next to "LAYERS" label */
+.layer-add-icon-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition);
+  font-family: var(--font);
+}
+
+.layer-add-icon-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(91, 108, 249, 0.08);
+}
+
+.layer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Individual layer row */
+.layer-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--ctrl-bg);
+  cursor: pointer;
+  transition: all var(--transition);
+  min-width: 0;
+}
+
+.layer-item:hover:not(.active) {
+  border-color: var(--text-muted);
+}
+
+.layer-item.active {
+  border-color: var(--accent);
+  background: rgba(91, 108, 249, 0.10);
+}
+
+/* Eye (visibility) button */
+.layer-vis-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px 3px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color var(--transition);
+}
+
+.layer-vis-btn:hover { color: var(--text); }
+.layer-vis-btn.off   { color: var(--text-muted); }
+
+/* Layer name text */
+.layer-name {
+  flex: 1;
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  user-select: none;
+}
+
+.layer-item.active .layer-name { color: var(--text); }
+
+/* Inline rename input */
+.layer-rename-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  font-size: 11px;
+  font-family: var(--font);
+  border-radius: 3px;
+  padding: 1px 5px;
+  outline: none;
+  min-width: 0;
+}
+
+/* Preset name badge (tiny, muted) */
+.layer-preset-badge {
+  font-size: 9px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  max-width: 46px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.layer-item.active .layer-preset-badge { color: rgba(91,108,249,0.7); }
+
+/* Delete (✕) button */
+.layer-del-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 10px;
+  flex-shrink: 0;
+  transition: color var(--transition);
+  line-height: 1;
+  font-family: var(--font);
+}
+
+.layer-del-btn:hover:not(:disabled) { color: #e05a5a; }
+.layer-del-btn:disabled { opacity: 0.25; cursor: default; }
+
+/* ── Responsive (narrow screens) ──────────────────────────── */
+
+@media (max-width: 640px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    height: auto;
+    max-height: 48vh;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow-y: auto;
+  }
+
+  .sidebar.collapsed {
+    max-height: 48px;
+    overflow: hidden;
+  }
+
+  .sidebar-content {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .sidebar.collapsed .sidebar-content {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .preview-area {
+    flex: 1;
+    min-height: 50vh;
+  }
+}

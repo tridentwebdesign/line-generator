@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SVG Line Generator</title>
+  <meta name="description" content="流線型の抽象ラインアートを生成・調整・SVG書き出しできるWebジェネレーター" />
+
+  <!-- OGP -->
+  <meta property="og:title"       content="SVG Line Generator" />
+  <meta property="og:description" content="流線型の抽象ラインアートを生成・調整・SVG書き出しできるWebツール" />
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://tridentwebdesign.github.io/line-generator/" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content="SVG Line Generator" />
+  <meta name="twitter:description" content="流線型の抽象ラインアートを生成・調整・SVG書き出しできるWebツール" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sidebar-header">
+        <span class="app-title">LINE GENERATOR</span>
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <rect x="1" y="2.5"  width="14" height="1.5" rx="0.75"/>
+            <rect x="1" y="7.25" width="14" height="1.5" rx="0.75"/>
+            <rect x="1" y="12"   width="14" height="1.5" rx="0.75"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-content" id="sidebar-content">
+
+        <!-- Presets -->
+        <div class="section">
+          <div class="section-label">PRESET</div>
+          <div class="preset-grid" id="preset-grid"></div>
+        </div>
+
+        <!-- Dynamically-generated sliders (ui.js) -->
+        <div id="controls-container"></div>
+
+        <!-- Action buttons -->
+        <div class="section actions-section">
+          <button class="btn btn-primary" id="btn-toggle-anim">▶ Animate</button>
+          <div class="btn-row">
+            <button class="btn btn-secondary" id="btn-randomize">Randomize</button>
+            <button class="btn btn-secondary" id="btn-reset">Reset</button>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-export" id="btn-svg">↓ SVG</button>
+            <button class="btn btn-export" id="btn-png">↓ PNG</button>
+          </div>
+        </div>
+
+      </div><!-- /sidebar-content -->
+    </aside>
+
+    <!-- ── Preview ── -->
+    <main class="preview-area">
+      <svg id="preview-svg"
+           xmlns="http://www.w3.org/2000/svg"
+           preserveAspectRatio="xMidYMid meet">
+      </svg>
+    </main>
+
+  </div><!-- /app -->
+
+  <!-- Scripts: generator first (no deps), then export, ui, finally app -->
+  <script src="js/generator.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
