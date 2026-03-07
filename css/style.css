@@ -403,7 +403,7 @@ input[type='color'] {
   cursor: grab;
 }
 
-#preview-svg.is-panning {
+#preview-svg.panning {
   cursor: grabbing;
 }
 
@@ -471,12 +471,6 @@ input[type='color'] {
 
 /* ── Responsive (narrow screens) ──────────────────────────── */
 /* ── Layer panel ───────────────────────────────────────────── */
-
-.section-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
 
 /* Small ＋ button next to "LAYERS" label */
 .layer-add-icon-btn {

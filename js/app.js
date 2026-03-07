@@ -543,8 +543,8 @@ function init() {
     });
 
   // Re-render on resize
-  const ro = new ResizeObserver(() => { if (!state.animating) render(); });
-  ro.observe(document.getElementById('preview-svg'));
+  state.resizeObserver = new ResizeObserver(() => { if (!state.animating) render(); });
+  state.resizeObserver.observe(document.getElementById('preview-svg'));
 
   // Zoom / pan interaction
   setupZoomInteraction();
