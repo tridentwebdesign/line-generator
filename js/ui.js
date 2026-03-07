@@ -121,38 +121,38 @@ const PRESETS = {
 
 const CONTROL_SECTIONS = [
   {
-    label: 'STRUCTURE',
+    label: '構造',
     controls: [
-      { key: 'lineCount',   label: 'Line Count',   min: 3,    max: 120,  step: 1,     decimals: 0 },
-      { key: 'steps',       label: 'Smoothness',   min: 3,    max: 22,   step: 1,     decimals: 0 },
-      { key: 'strokeWidth', label: 'Stroke Width', min: 0.2,  max: 6,    step: 0.1,   decimals: 1 },
+      { key: 'lineCount',   label: 'ライン数',   min: 3,    max: 120,  step: 1,     decimals: 0 },
+      { key: 'steps',       label: 'なめらかさ', min: 3,    max: 22,   step: 1,     decimals: 0 },
+      { key: 'strokeWidth', label: '線の太さ',   min: 0.2,  max: 6,    step: 0.1,   decimals: 1 },
     ],
   },
   {
-    label: 'SHAPE',
+    label: '形状',
     controls: [
-      { key: 'amplitude',   label: 'Amplitude',    min: 0.01, max: 0.50, step: 0.01,  decimals: 2 },
-      { key: 'tension',     label: 'Tension',      min: 0.15, max: 3.0,  step: 0.05,  decimals: 2 },
-      { key: 'spread',      label: 'Spread',       min: 0.05, max: 1.0,  step: 0.01,  decimals: 2 },
-      { key: 'noiseAmount', label: 'Noise',        min: 0,    max: 0.08, step: 0.002, decimals: 3 },
-      { key: 'angle',       label: 'Angle °',      min: -180, max: 180,  step: 1,     decimals: 0 },
+      { key: 'amplitude',   label: '振幅',       min: 0.01, max: 0.50, step: 0.01,  decimals: 2 },
+      { key: 'tension',     label: 'テンション', min: 0.15, max: 3.0,  step: 0.05,  decimals: 2 },
+      { key: 'spread',      label: '広がり',     min: 0.05, max: 1.0,  step: 0.01,  decimals: 2 },
+      { key: 'noiseAmount', label: 'ノイズ',     min: 0,    max: 0.08, step: 0.002, decimals: 3 },
+      { key: 'angle',       label: '角度 °',     min: -180, max: 180,  step: 1,     decimals: 0 },
     ],
   },
   {
-    label: 'COLOUR',
+    label: 'カラー',
     controls: [
-      { key: 'hueStart',   label: 'Hue Start',    min: 0,    max: 360,  step: 1,     decimals: 0 },
-      { key: 'hueEnd',     label: 'Hue End',      min: 0,    max: 360,  step: 1,     decimals: 0 },
-      { key: 'saturation', label: 'Saturation',   min: 0,    max: 100,  step: 1,     decimals: 0 },
-      { key: 'lightness',  label: 'Lightness',    min: 15,   max: 95,   step: 1,     decimals: 0 },
-      { key: 'opacity',    label: 'Opacity',      min: 0.05, max: 1.0,  step: 0.01,  decimals: 2 },
+      { key: 'hueStart',   label: '色相（開始）', min: 0,    max: 360,  step: 1,     decimals: 0 },
+      { key: 'hueEnd',     label: '色相（終了）', min: 0,    max: 360,  step: 1,     decimals: 0 },
+      { key: 'saturation', label: '彩度',         min: 0,    max: 100,  step: 1,     decimals: 0 },
+      { key: 'lightness',  label: '明度',         min: 15,   max: 95,   step: 1,     decimals: 0 },
+      { key: 'opacity',    label: '不透明度',     min: 0.05, max: 1.0,  step: 0.01,  decimals: 2 },
     ],
   },
   {
-    label: 'ANIMATION',
+    label: 'アニメーション',
     controls: [
-      { key: 'animationSpeed',    label: 'Speed',    min: 0.05, max: 4.0, step: 0.05, decimals: 2 },
-      { key: 'animationStrength', label: 'Strength', min: 0.05, max: 2.5, step: 0.05, decimals: 2 },
+      { key: 'animationSpeed',    label: 'スピード', min: 0.05, max: 4.0, step: 0.05, decimals: 2 },
+      { key: 'animationStrength', label: '強度',     min: 0.05, max: 2.5, step: 0.05, decimals: 2 },
     ],
   },
 ];
@@ -178,7 +178,7 @@ function buildLayerPanel() {
 
   panel.innerHTML = '';
 
-  const storageKey = 'slg-sec-LAYERS';
+  const storageKey = 'slg-sec-レイヤー';
   const saved      = localStorage.getItem(storageKey);
   const collapsed  = saved === 'true';  // default open
 
@@ -192,11 +192,11 @@ function buildLayerPanel() {
 
   const lbl = document.createElement('div');
   lbl.className   = 'section-label';
-  lbl.textContent = 'LAYERS';
+  lbl.textContent = 'レイヤー';
 
   const addBtn = document.createElement('button');
   addBtn.className = 'layer-add-icon-btn';
-  addBtn.title     = 'Add new layer';
+  addBtn.title     = 'レイヤーを追加';
   addBtn.textContent = '＋';
   // stopPropagation so clicking ＋ does NOT toggle collapse
   addBtn.addEventListener('click', (e) => { e.stopPropagation(); addLayer(); });
@@ -262,7 +262,7 @@ function refreshLayerUI() {
     // Visibility toggle
     const visBtn = document.createElement('button');
     visBtn.className = 'layer-vis-btn' + (layer.visible ? '' : ' off');
-    visBtn.title = layer.visible ? 'Hide layer' : 'Show layer';
+    visBtn.title = layer.visible ? 'レイヤーを非表示' : 'レイヤーを表示';
     visBtn.innerHTML = layer.visible
       ? '<svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor"><path d="M6.5 0C3.5 0 1 2 0 5c1 3 3.5 5 6.5 5S12 8 13 5C12 2 9.5 0 6.5 0zm0 8a3 3 0 110-6 3 3 0 010 6zm0-4.8a1.8 1.8 0 100 3.6 1.8 1.8 0 000-3.6z"/></svg>'
       : '<svg width="13" height="10" viewBox="0 0 13 10" fill="currentColor" opacity="0.35"><path d="M6.5 0C3.5 0 1 2 0 5c1 3 3.5 5 6.5 5S12 8 13 5C12 2 9.5 0 6.5 0zm0 8a3 3 0 110-6 3 3 0 010 6zm0-4.8a1.8 1.8 0 100 3.6 1.8 1.8 0 000-3.6z"/></svg>';
@@ -283,7 +283,7 @@ function refreshLayerUI() {
     // Delete button
     const delBtn = document.createElement('button');
     delBtn.className = 'layer-del-btn';
-    delBtn.title = 'Delete layer';
+    delBtn.title = 'レイヤーを削除';
     delBtn.innerHTML = '&#x2715;';
     delBtn.disabled = state.layers.length <= 1;
     delBtn.addEventListener('click', (e) => {
@@ -316,7 +316,7 @@ function startRename(el, index) {
   input.select();
 
   const commit = () => {
-    const newName = input.value.trim() || `Layer ${index + 1}`;
+    const newName = input.value.trim() || `レイヤー ${index + 1}`;
     state.layers[index].name = newName;
     refreshLayerUI();
   };
@@ -332,7 +332,7 @@ function startRename(el, index) {
 /* ── Control panel (sliders) ──────────────────────────────── */
 
 /** Sections collapsed by default on first load */
-const DEFAULT_COLLAPSED_SECTIONS = new Set(['ANIMATION', 'BACKGROUND']);
+const DEFAULT_COLLAPSED_SECTIONS = new Set(['アニメーション', '背景']);
 
 /** Chevron SVG string */
 const CHEVRON_SVG = '<svg width="8" height="5" viewBox="0 0 8 5" fill="currentColor"><path d="M0 0l4 5 4-5H0z"/></svg>';
@@ -404,7 +404,7 @@ function buildControlPanel() {
   const txt = document.createElement('label');
   txt.className   = 'control-label';
   txt.htmlFor     = 'ctrl-backgroundColor';
-  txt.textContent = 'Background';
+  txt.textContent = '背景色';
 
   const swatch = document.createElement('div');
   swatch.className = 'color-swatch';

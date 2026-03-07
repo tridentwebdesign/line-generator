@@ -269,10 +269,10 @@ function updateAnimButton() {
   const btn = document.getElementById('btn-toggle-anim');
   if (!btn) return;
   if (state.animating) {
-    btn.textContent = '⏹ Stop';
+    btn.textContent = '⏹ 停止';
     btn.classList.add('active');
   } else {
-    btn.textContent = '▶ Animate';
+    btn.textContent = '▶ アニメーション';
     btn.classList.remove('active');
   }
 }
@@ -285,7 +285,7 @@ function updateAnimButton() {
  */
 function addLayer() {
   const idx  = state.layers.length + 1;
-  const layer = createLayer(`Layer ${idx}`);
+  const layer = createLayer(`レイヤー ${idx}`);
 
   // Shift hue +60° relative to the current top layer for instant contrast
   const topLayer = state.layers[state.layers.length - 1];
@@ -507,7 +507,7 @@ function setupZoomInteraction() {
 
 function init() {
   // Create the initial layer
-  state.layers           = [createLayer('Layer 1')];
+  state.layers           = [createLayer('レイヤー 1')];
   state.activeLayerIndex = 0;
 
   // Build UI (order matters: layer panel first, then sliders)
