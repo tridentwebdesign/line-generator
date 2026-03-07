@@ -21,31 +21,31 @@
 
 const DEFAULTS = {
   // Structure
-  lineCount:         40,
-  steps:             10,
-  strokeWidth:       1.5,
+  lineCount:         62,
+  steps:             22,
+  strokeWidth:       1.9,
 
   // Shape
-  amplitude:         0.13,
-  tension:           1.0,
-  spread:            0.65,
-  noiseAmount:       0.014,
+  amplitude:         0.15,
+  tension:           3.0,
+  spread:            0.15,
+  noiseAmount:       0.024,
   noiseSeed:         0,
-  angle:             0,       // degrees  –180 … 180
+  angle:             -18,     // degrees  –180 … 180
 
   // Colour
-  hueStart:          198,
-  hueEnd:            255,
-  saturation:        68,
-  lightness:         66,
-  opacity:           0.74,
+  hueStart:          9,
+  hueEnd:            273,
+  saturation:        59,
+  lightness:         62,
+  opacity:           0.68,
 
   // Scene
-  backgroundColor:   '#080c14',
+  backgroundColor:   '#ffffff',
 
   // Animation
-  animationSpeed:    0.85,
-  animationStrength: 0.60,
+  animationSpeed:    1.0,
+  animationStrength: 0.40,
 };
 
 /* ── Layer factory ────────────────────────────────────────── */
@@ -359,7 +359,11 @@ function randomize() {
 /* ── Reset ────────────────────────────────────────────────── */
 
 function resetToDefault() {
-  applyPreset('Calm Wave');
+  state.params       = { ...DEFAULTS };
+  state.activePreset = null;
+  updateUI();
+  updatePresetButtons();
+  if (!state.animating) render();
 }
 
 /* ── Init ─────────────────────────────────────────────────── */
@@ -374,8 +378,9 @@ function init() {
   buildControlPanel();
   buildPresetButtons();
 
-  // Apply default preset (also calls updateUI + updatePresetButtons)
-  applyPreset('Calm Wave');
+  // Sync UI to DEFAULTS (no preset pre-selected)
+  updateUI();
+  updatePresetButtons();
 
   // Action buttons
   document.getElementById('btn-randomize')
