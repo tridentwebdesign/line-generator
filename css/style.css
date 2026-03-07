@@ -11,7 +11,7 @@
   --accent-h:     #7b8cfb;
   --text:         #d4d8ec;
   --text-dim:     #8a8fa8;
-  --text-muted:   #555a72;
+  --text-muted:   #868baa;  /* was #555a72 – brightened for WCAG AA 4.5:1 */
   --success:      #4ecb8f;
   --panel-w:      292px;
   --radius:       6px;
@@ -219,8 +219,8 @@ body {
 }
 
 .preset-btn.active {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: #3e50e0;  /* darker for WCAG: white 6.12:1 (was --accent: 4.24:1) */
+  border-color: #3e50e0;
   color: #fff;
 }
 
@@ -246,7 +246,7 @@ body {
 
 .control-value {
   font-size: 12.5px;
-  color: var(--accent);
+  color: var(--accent-h);  /* --accent-h is lighter: 5.96:1 vs dark bg (was --accent: 4.23:1) */
   font-variant-numeric: tabular-nums;
   min-width: 38px;
   text-align: right;
@@ -341,16 +341,17 @@ input[type='color'] {
 }
 
 .btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: #3e50e0;  /* darker than --accent for WCAG: white 6.12:1 */
+  border-color: #3e50e0;
   color: #fff;
 }
 
-.btn-primary:hover { background: var(--accent-h); border-color: var(--accent-h); }
+.btn-primary:hover { background: #4e60ee; border-color: #4e60ee; }  /* white 4.71:1 */
 
 .btn-primary.active {
   background: var(--success);
   border-color: var(--success);
+  color: var(--bg);  /* dark text on bright green: 9.37:1 (was white: 2.05:1) */
 }
 
 .btn-secondary {
