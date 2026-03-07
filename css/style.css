@@ -380,6 +380,13 @@ input[type='color'] {
   width: 100%;
 }
 
+.btn-export:disabled {
+  opacity: 0.55;
+  cursor: wait;
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
 .actions-section {
   display: flex;
   flex-direction: column;
