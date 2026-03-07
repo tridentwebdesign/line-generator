@@ -178,39 +178,59 @@ function buildLayerPanel() {
 
   panel.innerHTML = '';
 
-  const sec = document.createElement('div');
-  sec.className = 'section';
+  const storageKey = 'slg-sec-LAYERS';
+  const saved      = localStorage.getItem(storageKey);
+  const collapsed  = saved === 'true';  // default open
 
-  // Header row: label + Add button
+  const sec = document.createElement('div');
+  sec.className = 'section' + (collapsed ? ' sec-collapsed' : '');
+
+  // Header row: label + Add button + chevron (entire row is toggle target)
   const headerRow = document.createElement('div');
-  headerRow.className = 'section-header-row';
+  headerRow.className = 'section-toggle-header';
+  headerRow.style.cursor = 'pointer';
 
   const lbl = document.createElement('div');
-  lbl.className = 'section-label';
-  lbl.style.marginBottom = '0';
+  lbl.className   = 'section-label';
   lbl.textContent = 'LAYERS';
 
   const addBtn = document.createElement('button');
   addBtn.className = 'layer-add-icon-btn';
-  addBtn.title = 'Add new layer';
+  addBtn.title     = 'Add new layer';
   addBtn.textContent = '＋';
-  addBtn.addEventListener('click', addLayer);
+  // stopPropagation so clicking ＋ does NOT toggle collapse
+  addBtn.addEventListener('click', (e) => { e.stopPropagation(); addLayer(); });
+
+  const chevron = document.createElement('span');
+  chevron.className = 'section-chevron';
+  chevron.innerHTML = CHEVRON_SVG;
 
   headerRow.appendChild(lbl);
   headerRow.appendChild(addBtn);
+  headerRow.appendChild(chevron);
   sec.appendChild(headerRow);
+
+  headerRow.addEventListener('click', () => {
+    const nowCollapsed = sec.classList.toggle('sec-collapsed');
+    localStorage.setItem(storageKey, nowCollapsed);
+  });
+
+  // Collapsible body
+  const body = document.createElement('div');
+  body.className = 'section-body';
 
   // Spacer
   const spacer = document.createElement('div');
-  spacer.style.height = '8px';
-  sec.appendChild(spacer);
+  spacer.style.height = '4px';
+  body.appendChild(spacer);
 
   // Layer list container (rebuilt by refreshLayerUI)
   const list = document.createElement('div');
-  list.id = 'layer-list';
+  list.id        = 'layer-list';
   list.className = 'layer-list';
-  sec.appendChild(list);
+  body.appendChild(list);
 
+  sec.appendChild(body);
   panel.appendChild(sec);
 
   // Populate the list immediately
@@ -311,42 +331,79 @@ function startRename(el, index) {
 
 /* ── Control panel (sliders) ──────────────────────────────── */
 
+/** Sections collapsed by default on first load */
+const DEFAULT_COLLAPSED_SECTIONS = new Set(['ANIMATION', 'BACKGROUND']);
+
+/** Chevron SVG string */
+const CHEVRON_SVG = '<svg width="8" height="5" viewBox="0 0 8 5" fill="currentColor"><path d="M0 0l4 5 4-5H0z"/></svg>';
+
+/**
+ * Create a collapsible section wrapper.
+ * @param {string} label       Section heading text
+ * @param {boolean} [forceOpen] If true, ignore localStorage (used for fresh installs)
+ * @returns {{ sec, body, header }}
+ */
+function createCollapsibleSection(label) {
+  const storageKey  = `slg-sec-${label}`;
+  const saved       = localStorage.getItem(storageKey);
+  const collapsed   = saved !== null
+    ? saved === 'true'
+    : DEFAULT_COLLAPSED_SECTIONS.has(label);
+
+  const sec = document.createElement('div');
+  sec.className = 'section' + (collapsed ? ' sec-collapsed' : '');
+
+  const header = document.createElement('div');
+  header.className = 'section-toggle-header';
+
+  const lbl = document.createElement('div');
+  lbl.className   = 'section-label';
+  lbl.textContent = label;
+
+  const chevron = document.createElement('span');
+  chevron.className = 'section-chevron';
+  chevron.innerHTML = CHEVRON_SVG;
+
+  header.appendChild(lbl);
+  header.appendChild(chevron);
+  sec.appendChild(header);
+
+  const body = document.createElement('div');
+  body.className = 'section-body';
+  sec.appendChild(body);
+
+  header.addEventListener('click', () => {
+    const nowCollapsed = sec.classList.toggle('sec-collapsed');
+    localStorage.setItem(storageKey, nowCollapsed);
+  });
+
+  return { sec, body };
+}
+
 function buildControlPanel() {
   const container = document.getElementById('controls-container');
   if (!container) return;
   container.innerHTML = '';
 
   for (const section of CONTROL_SECTIONS) {
-    const sec = document.createElement('div');
-    sec.className = 'section';
-
-    const lbl = document.createElement('div');
-    lbl.className = 'section-label';
-    lbl.textContent = section.label;
-    sec.appendChild(lbl);
+    const { sec, body } = createCollapsibleSection(section.label);
 
     for (const ctrl of section.controls) {
-      sec.appendChild(createSlider(ctrl));
+      body.appendChild(createSlider(ctrl));
     }
 
     container.appendChild(sec);
   }
 
-  // Background colour picker
-  const bgSec = document.createElement('div');
-  bgSec.className = 'section';
-
-  const bgHdr = document.createElement('div');
-  bgHdr.className = 'section-label';
-  bgHdr.textContent = 'BACKGROUND';
-  bgSec.appendChild(bgHdr);
+  // Background colour picker (collapsible)
+  const { sec: bgSec, body: bgBody } = createCollapsibleSection('BACKGROUND');
 
   const row = document.createElement('div');
   row.className = 'color-row control-row';
 
   const txt = document.createElement('label');
-  txt.className = 'control-label';
-  txt.htmlFor   = 'ctrl-backgroundColor';
+  txt.className   = 'control-label';
+  txt.htmlFor     = 'ctrl-backgroundColor';
   txt.textContent = 'Background';
 
   const swatch = document.createElement('div');
@@ -366,7 +423,7 @@ function buildControlPanel() {
   swatch.appendChild(inp);
   row.appendChild(txt);
   row.appendChild(swatch);
-  bgSec.appendChild(row);
+  bgBody.appendChild(row);
   container.appendChild(bgSec);
 }
 

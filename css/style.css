@@ -124,7 +124,6 @@ body {
 
 /* ── Sections ──────────────────────────────────────────────── */
 .section {
-  padding: 12px 14px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -135,7 +134,58 @@ body {
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--text-muted);
-  margin-bottom: 10px;
+  margin-bottom: 0;
+}
+
+/* ── Collapsible section toggle header ─────────────────────── */
+.section-toggle-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  cursor: pointer;
+  user-select: none;
+  gap: 6px;
+}
+
+.section-toggle-header:hover .section-label {
+  color: var(--text-dim);
+}
+
+.section-chevron {
+  color: var(--text-muted);
+  opacity: 0.55;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  line-height: 0;
+}
+
+.section-toggle-header:hover .section-chevron {
+  opacity: 0.9;
+}
+
+.sec-collapsed .section-chevron {
+  transform: rotate(-90deg);
+}
+
+/* Collapsible body */
+.section-body {
+  overflow: hidden;
+  max-height: 500px;
+  opacity: 1;
+  padding: 0 14px 12px;
+  transition: max-height 0.22s ease, opacity 0.18s ease, padding 0.22s ease;
+}
+
+.sec-collapsed .section-body {
+  max-height: 0;
+  opacity: 0;
+  padding-bottom: 0;
+}
+
+/* Non-collapsible sections (e.g. presets) keep original padding */
+.section.section--static {
+  padding: 12px 14px;
 }
 
 /* ── Presets ───────────────────────────────────────────────── */
