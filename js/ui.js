@@ -1,121 +1,8 @@
 /* ============================================================
-   ui.js – Control panel, presets, layer UI, event binding
-   ============================================================
-   v2 additions
-   ─────────────
-   • angle slider added to SHAPE section
-   • buildLayerPanel() / refreshLayerUI() – inject/rebuild the
-     layer management section at the top of the sidebar
-   • All slider events + applyPreset write through state.params
-     which proxies to the active layer (defined in app.js).
+   ui.js – Control panel, layer UI, event binding
    ============================================================ */
 
 'use strict';
-
-/* ── Presets ──────────────────────────────────────────────── */
-
-const PRESETS = {
-
-  'Calm Wave': {
-    lineCount:         35,
-    steps:             10,
-    strokeWidth:       1.2,
-    amplitude:         0.12,
-    tension:           1.0,
-    spread:            0.65,
-    noiseAmount:       0.012,
-    noiseSeed:         3.7,
-    angle:             0,
-    hueStart:          195,
-    hueEnd:            252,
-    saturation:        66,
-    lightness:         68,
-    opacity:           0.73,
-    backgroundColor:   '#080c14',
-    animationSpeed:    0.82,
-    animationStrength: 0.60,
-  },
-
-  'Ribbon Flow': {
-    lineCount:         22,
-    steps:             9,
-    strokeWidth:       2.1,
-    amplitude:         0.21,
-    tension:           0.72,
-    spread:            0.74,
-    noiseAmount:       0.009,
-    noiseSeed:         17.4,
-    angle:             0,
-    hueStart:          28,
-    hueEnd:            340,
-    saturation:        80,
-    lightness:         65,
-    opacity:           0.82,
-    backgroundColor:   '#0f0810',
-    animationSpeed:    0.52,
-    animationStrength: 0.80,
-  },
-
-  'Dense Blend': {
-    lineCount:         68,
-    steps:             12,
-    strokeWidth:       0.65,
-    amplitude:         0.08,
-    tension:           1.85,
-    spread:            0.54,
-    noiseAmount:       0.017,
-    noiseSeed:         42.1,
-    angle:             0,
-    hueStart:          168,
-    hueEnd:            218,
-    saturation:        54,
-    lightness:         70,
-    opacity:           0.52,
-    backgroundColor:   '#040810',
-    animationSpeed:    1.20,
-    animationStrength: 0.42,
-  },
-
-  'Aurora Lines': {
-    lineCount:         45,
-    steps:             11,
-    strokeWidth:       1.5,
-    amplitude:         0.17,
-    tension:           0.88,
-    spread:            0.84,
-    noiseAmount:       0.024,
-    noiseSeed:         61.5,
-    angle:             0,
-    hueStart:          122,
-    hueEnd:            300,
-    saturation:        84,
-    lightness:         63,
-    opacity:           0.68,
-    backgroundColor:   '#030609',
-    animationSpeed:    1.00,
-    animationStrength: 0.72,
-  },
-
-  'Minimal Contour': {
-    lineCount:         10,
-    steps:             8,
-    strokeWidth:       1.9,
-    amplitude:         0.28,
-    tension:           0.52,
-    spread:            0.70,
-    noiseAmount:       0.005,
-    noiseSeed:         88.2,
-    angle:             0,
-    hueStart:          210,
-    hueEnd:            226,
-    saturation:        34,
-    lightness:         78,
-    opacity:           0.90,
-    backgroundColor:   '#0a0c10',
-    animationSpeed:    0.58,
-    animationStrength: 1.00,
-  },
-};
 
 /* ── Control sections ─────────────────────────────────────── */
 
@@ -135,6 +22,8 @@ const CONTROL_SECTIONS = [
       { key: 'tension',     label: 'テンション', min: 0.15, max: 3.0,  step: 0.05,  decimals: 2 },
       { key: 'spread',      label: '広がり',     min: 0.05, max: 1.0,  step: 0.01,  decimals: 2 },
       { key: 'noiseAmount', label: 'ノイズ',     min: 0,    max: 0.08, step: 0.002, decimals: 3 },
+      { key: 'curl',        label: 'カール',     min: -1.0, max: 1.0,  step: 0.01,  decimals: 2 },
+      { key: 'wiggle',      label: 'うねり',     min: 0,    max: 1.0,  step: 0.01,  decimals: 2 },
       { key: 'angle',       label: '角度 °',     min: -180, max: 180,  step: 1,     decimals: 0 },
     ],
   },
@@ -172,7 +61,7 @@ function buildLayerPanel() {
   if (!panel) {
     panel = document.createElement('div');
     panel.id = 'layer-panel';
-    // Insert at the very top, before the presets section
+    // Insert at the very top, before the controls section
     sidebarContent.insertBefore(panel, sidebarContent.firstChild);
   }
 
@@ -275,11 +164,6 @@ function refreshLayerUI() {
     // Double-click to rename inline
     namePart.addEventListener('dblclick', () => startRename(namePart, index));
 
-    // Preset badge (small, shows which preset is active)
-    const badge = document.createElement('span');
-    badge.className = 'layer-preset-badge';
-    badge.textContent = layer.activePreset ? layer.activePreset.split(' ')[0] : '';
-
     // Delete button
     const delBtn = document.createElement('button');
     delBtn.className = 'layer-del-btn';
@@ -293,7 +177,6 @@ function refreshLayerUI() {
 
     item.appendChild(visBtn);
     item.appendChild(namePart);
-    item.appendChild(badge);
     item.appendChild(delBtn);
     list.appendChild(item);
   });
@@ -415,8 +298,6 @@ function buildControlPanel() {
   inp.value = state.params.backgroundColor || '#080c14';
   inp.addEventListener('input', (e) => {
     state.params.backgroundColor = e.target.value;
-    state.activePreset = null;
-    updatePresetButtons();
     if (!state.animating) render();
   });
 
@@ -464,8 +345,6 @@ function createSlider(ctrl) {
     state.params[ctrl.key] = val;
     badge.textContent = val.toFixed(ctrl.decimals);
     updateSliderFill(slider);
-    state.activePreset = null;
-    updatePresetButtons();
     if (!state.animating) render();
   });
 
@@ -479,40 +358,6 @@ function updateSliderFill(slider) {
   const val = parseFloat(slider.value);
   const pct = ((val - lo) / (hi - lo) * 100).toFixed(1) + '%';
   slider.style.setProperty('--fill', pct);
-}
-
-/* ── Preset buttons ───────────────────────────────────────── */
-
-function buildPresetButtons() {
-  const grid = document.getElementById('preset-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  for (const name of Object.keys(PRESETS)) {
-    const btn = document.createElement('button');
-    btn.className      = 'preset-btn';
-    btn.textContent    = name;
-    btn.dataset.preset = name;
-    btn.addEventListener('click', () => applyPreset(name));
-    grid.appendChild(btn);
-  }
-}
-
-function applyPreset(name) {
-  const preset = PRESETS[name];
-  if (!preset) return;
-  state.params       = { ...state.params, ...preset };
-  state.activePreset = name;
-  updateUI();
-  updatePresetButtons();
-  if (!state.animating) render();
-}
-
-function updatePresetButtons() {
-  const btns = document.querySelectorAll('.preset-btn');
-  for (const btn of btns) {
-    btn.classList.toggle('active', btn.dataset.preset === state.activePreset);
-  }
 }
 
 /* ── Sync UI ──────────────────────────────────────────────── */

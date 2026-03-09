@@ -5,9 +5,9 @@
    ─────────────
    • Multi-layer support: state.layers[] array, each layer
      holds its own params + visibility + name.
-   • state.params and state.activePreset are virtual properties
-     (getter/setter) that proxy to the active layer, so all
-     existing code in ui.js / export.js continues to work.
+   • state.params is a virtual property (getter/setter) that
+     proxies to the active layer, so all existing code in
+     ui.js / export.js continues to work.
    • Angle transform: render() wraps each layer's paths in a
      <g> with rotate+scale; vector-effect="non-scaling-stroke"
      keeps stroke widths constant under the scale.
@@ -32,6 +32,8 @@ const DEFAULTS = {
   noiseAmount:       0.024,
   noiseSeed:         0,
   angle:             -18,     // degrees  –180 … 180
+  curl:              0,       // −1 (内巻き) … +1 (外巻き)
+  wiggle:            0,       // 0 … 1  蛇のようなうねり
 
   // Colour
   hueStart:          9,
@@ -62,7 +64,6 @@ function createLayer(name) {
     name,
     visible:      true,
     params:       { ...DEFAULTS },
-    activePreset: null,
   };
 }
 
@@ -99,19 +100,6 @@ Object.defineProperty(state, 'params', {
   enumerable: true,
 });
 
-/**
- * Virtual property: proxies to the active layer's activePreset.
- */
-Object.defineProperty(state, 'activePreset', {
-  get() {
-    return state.layers[state.activeLayerIndex]?.activePreset ?? null;
-  },
-  set(v) {
-    const l = state.layers[state.activeLayerIndex];
-    if (l) l.activePreset = v;
-  },
-  enumerable: true,
-});
 
 /* ── Angle transform helper ───────────────────────────────── */
 
@@ -299,7 +287,6 @@ function addLayer() {
 
   refreshLayerUI();
   updateUI();
-  updatePresetButtons();
   if (!state.animating) render();
 }
 
@@ -314,7 +301,6 @@ function removeLayer(index) {
   state.activeLayerIndex = Math.min(state.activeLayerIndex, state.layers.length - 1);
   refreshLayerUI();
   updateUI();
-  updatePresetButtons();
   if (!state.animating) render();
 }
 
@@ -328,7 +314,6 @@ function setActiveLayer(index) {
   state.activeLayerIndex = index;
   refreshLayerUI();
   updateUI();
-  updatePresetButtons();
 }
 
 /**
@@ -361,6 +346,8 @@ function randomize() {
     spread,
     noiseAmount:  r(0.003, 0.038),
     noiseSeed:    r(0, 100),
+    curl:         r(-0.6, 0.6),
+    wiggle:       r(0, 0.5),
     hueStart:     ri(0,  360),
     hueEnd:       ri(0,  360),
     saturation:   ri(40, 92),
@@ -368,19 +355,15 @@ function randomize() {
     opacity:      r(0.50, 0.95),
   };
 
-  state.activePreset = null;
   updateUI();
-  updatePresetButtons();
   if (!state.animating) render();
 }
 
 /* ── Reset ────────────────────────────────────────────────── */
 
 function resetToDefault() {
-  state.params       = { ...DEFAULTS };
-  state.activePreset = null;
+  state.params = { ...DEFAULTS };
   updateUI();
-  updatePresetButtons();
   if (!state.animating) render();
 }
 
@@ -513,11 +496,9 @@ function init() {
   // Build UI (order matters: layer panel first, then sliders)
   buildLayerPanel();
   buildControlPanel();
-  buildPresetButtons();
 
-  // Sync UI to DEFAULTS (no preset pre-selected)
+  // Sync UI to DEFAULTS
   updateUI();
-  updatePresetButtons();
 
   // Action buttons
   document.getElementById('btn-randomize')

@@ -86,6 +86,8 @@ function getLineY(xFrac, lineT, params, time) {
     noiseAmount,
     animationStrength,
     noiseSeed,
+    curl,
+    wiggle,
   } = params;
 
   const TAU = Math.PI * 2;
@@ -114,6 +116,25 @@ function getLineY(xFrac, lineT, params, time) {
 
   // Linearly interpolate for this line
   let y = yA + (yB - yA) * lineT;
+
+  // ── Curl: inward (−) / outward (+) bow effect ───────────
+  // Each line bows proportionally to its distance from centre
+  // and follows a sine envelope along x so it tapers at edges.
+  if (curl) {
+    const curlVal = curl || 0;
+    const deviation = lineT - 0.5;  // −0.5 (top) to +0.5 (bottom)
+    const envelope  = Math.sin(xFrac * Math.PI);  // 0 at edges, 1 at centre
+    y += curlVal * deviation * envelope * amplitude * 2.0;
+  }
+
+  // ── Wiggle: high-frequency serpentine undulation ─────────
+  // Adds snake-like waviness per line with varied phase offsets.
+  if (wiggle) {
+    const wigVal = wiggle || 0;
+    y += wigVal * Math.sin(
+      xFrac * TAU * tension * 2.5 + lineT * 9.7 + animPhase * 0.7
+    ) * amplitude * 0.45;
+  }
 
   // ── Structured noise (subtle organic variation) ──────────
   if (noiseAmount > 0) {

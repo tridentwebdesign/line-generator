@@ -260,6 +260,7 @@ function downloadLibrary() {
         parts.push('    var spr = params.spread, noise = params.noiseAmount;');
         parts.push('    var seed = params.noiseSeed || 0;');
         parts.push('    var str = params.animationStrength;');
+        parts.push('    var curl = params.curl || 0, wiggle = params.wiggle || 0;');
         parts.push('    var TAU = Math.PI * 2;');
         parts.push('    var cA = 0.5 - spr * 0.5, cB = 0.5 + spr * 0.5;');
         parts.push('    var ph = time * (str || 0.6);');
@@ -269,6 +270,14 @@ function downloadLibrary() {
         parts.push('            Math.sin(xFrac * TAU * ten * 1.6 + ph * 1.10 + 2.6) * 0.30;');
         parts.push('    var yA = cA + wA * amp, yB = cB + wB * amp;');
         parts.push('    var y = yA + (yB - yA) * lineT;');
+        parts.push('    if (curl) {');
+        parts.push('      var dev = lineT - 0.5;');
+        parts.push('      var env = Math.sin(xFrac * Math.PI);');
+        parts.push('      y += curl * dev * env * amp * 2.0;');
+        parts.push('    }');
+        parts.push('    if (wiggle) {');
+        parts.push('      y += wiggle * Math.sin(xFrac * TAU * ten * 2.5 + lineT * 9.7 + ph * 0.7) * amp * 0.45;');
+        parts.push('    }');
         parts.push('    if (noise > 0) {');
         parts.push('      y += smoothNoise(xFrac * 7.3 + lineT * 2.9 + seed,');
         parts.push('        lineT * 5.1 + xFrac * 1.8 + seed * 0.61) * noise;');
